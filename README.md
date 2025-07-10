@@ -47,6 +47,7 @@ A powerful web application that extracts and processes Albanian business registr
 ## 🚀 Quick Deploy
 
 ### Railway (Recommended)
+
 1. Fork this repository
 2. Visit [Railway](https://railway.app)
 3. Click "Start a New Project" → "Deploy from GitHub repo"
@@ -54,6 +55,7 @@ A powerful web application that extracts and processes Albanian business registr
 5. Railway will automatically detect and deploy your FastAPI app
 
 ### Render
+
 1. Fork this repository
 2. Visit [Render](https://render.com)
 3. Create a new Web Service from your GitHub repository
@@ -61,6 +63,7 @@ A powerful web application that extracts and processes Albanian business registr
 5. Set start command: `python main.py`
 
 ### Heroku
+
 1. Fork this repository
 2. Create a new Heroku app
 3. Connect your GitHub repository
@@ -126,12 +129,15 @@ The application specializes in processing Albanian business registry documents:
 ### Core Endpoints
 
 #### POST `/extract-links`
+
 Extract links from an uploaded PDF file.
 
 **Parameters:**
+
 - `file`: PDF file (multipart/form-data)
 
 **Response:**
+
 ```json
 {
   "filename": "example.pdf",
@@ -141,12 +147,15 @@ Extract links from an uploaded PDF file.
 ```
 
 #### POST `/process-pdf-urls`
+
 Process multiple PDF URLs and extract content.
 
 **Parameters:**
+
 - `urls`: List of PDF URLs (JSON array)
 
 **Response:**
+
 ```json
 {
   "results": [
@@ -161,12 +170,15 @@ Process multiple PDF URLs and extract content.
 ```
 
 #### POST `/extract-and-process-table`
+
 Extract and process Albanian business registry data.
 
 **Parameters:**
+
 - `file`: PDF file (multipart/form-data)
 
 **Response:**
+
 ```json
 {
   "status": "completed",
@@ -184,9 +196,11 @@ Extract and process Albanian business registry data.
 ### Health Check
 
 #### GET `/health`
+
 Health check endpoint for deployment monitoring.
 
 **Response:**
+
 ```json
 {
   "status": "healthy",
