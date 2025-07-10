@@ -1,48 +1,72 @@
-# PDF Link Extractor & Processor
+# PDF Analyzer - Albanian Business Registry Extractor
 
-A comprehensive Python backend application that extracts links from PDF documents and downloads/processes PDFs from those links using FastAPI.
+A powerful web application that extracts and processes Albanian business registry data from PDFs with links to government databases.
 
 ## 🚀 Features
 
 ### **Core PDF Processing**
 
 - **Multiple PDF Processing Libraries**: Uses both PyPDF2 and pdfplumber for comprehensive link extraction
-- **Various Link Types**: Extracts:
-  - HTTP/HTTPS URLs from text
-  - Email addresses
-  - PDF annotations (clickable links)
-  - Hyperlinks embedded in the PDF
+- **Various Link Types**: Extracts HTTP/HTTPS URLs, email addresses, PDF annotations, and hyperlinks
+- **Advanced Download**: Smart PDF downloading with enhanced headers for Albanian government sites
 
-### **Advanced PDF Download & Processing**
+### **Albanian Business Registry Integration**
 
-- **Automatic PDF Download**: Downloads PDFs from extracted URLs
-- **Content Extraction**: Extracts full text content from downloaded PDFs
-- **Content Analysis**: Analyzes extracted content for:
-  - Word count and character count
-  - Email addresses
-  - Phone numbers
-  - Dates
-  - Numerical values
-  - Content samples
-- **Metadata Extraction**: Extracts PDF metadata (title, author, creation date, etc.)
+- **Automatic Business Data Extraction**: Processes Albanian business registry PDFs
+- **Structured Data Parsing**: Extracts:
+  - NUIS (Business Registration Number)
+  - Business Names (Albanian & English)
+  - Addresses and Contact Information
+  - Activity Fields and Business Types
+  - Registration Dates and Status
+- **Government Database Support**: Specialized handling for QKB (National Business Center) URLs
+
+### **Professional Data Table**
+
+- **Comprehensive Business Table**: Displays all extracted business data in a searchable, sortable table
+- **Advanced Filtering**: Filter by business name, activity field, NUIS, and address
+- **Pagination**: Handles large datasets with efficient pagination
+- **Export Ready**: Structured data format for easy export and integration
 
 ### **Web Interface**
 
-- **Modern UI**: Clean, responsive web interface with tabbed navigation
-- **Multiple Modes**:
+- **Modern UI**: Clean, responsive web interface with 5 tabbed sections
+- **Multiple Processing Modes**:
   - Extract links from uploaded PDF
   - Process PDF URLs directly
-  - Extract links and automatically download/process found PDFs
+  - Extract and process all HTTP links
+  - Business registry table with full data extraction
 - **Real-time Processing**: Progress indicators and detailed results display
-- **Collapsible Results**: Organized, expandable content analysis
 
 ### **RESTful API**
 
-- **FastAPI-based**: Modern REST API for programmatic access
-- **Async Processing**: Concurrent processing of multiple URLs
+- **FastAPI-based**: Modern REST API with async processing
+- **Production Ready**: Environment variable configuration for deployment
 - **Comprehensive Error Handling**: Detailed error messages and status codes
 
-## Installation
+## 🚀 Quick Deploy
+
+### Railway (Recommended)
+1. Fork this repository
+2. Visit [Railway](https://railway.app)
+3. Click "Start a New Project" → "Deploy from GitHub repo"
+4. Select your forked repository
+5. Railway will automatically detect and deploy your FastAPI app
+
+### Render
+1. Fork this repository
+2. Visit [Render](https://render.com)
+3. Create a new Web Service from your GitHub repository
+4. Set build command: `pip install -r requirements.txt`
+5. Set start command: `python main.py`
+
+### Heroku
+1. Fork this repository
+2. Create a new Heroku app
+3. Connect your GitHub repository
+4. Deploy from the main branch
+
+## 🔧 Local Development
 
 1. Clone the repository:
 
@@ -51,11 +75,14 @@ git clone <repository-url>
 cd pdf-analyzer
 ```
 
-2. Create a virtual environment (recommended):
+2. Create a virtual environment:
 
 ```bash
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# Windows
+venv\Scripts\activate
+# macOS/Linux
+source venv/bin/activate
 ```
 
 3. Install dependencies:
@@ -64,103 +91,180 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-## Usage
-
-### Starting the Server
+4. Run the application:
 
 ```bash
 python main.py
 ```
 
-Or using uvicorn directly:
+Visit `http://localhost:8000` to access the web interface.
 
-```bash
-uvicorn main:app --host 0.0.0.0 --port 8000
-```
+## 🌍 Environment Variables
 
-The server will start on `http://localhost:8000`
+- `PORT`: Server port (default: 8000)
+- `HOST`: Server host (default: 0.0.0.0)
+
+## 📖 Usage Guide
 
 ### Web Interface
 
-1. Open your browser and go to `http://localhost:8000`
-2. Upload a PDF file using the drag-and-drop interface or file picker
-3. View the extracted links with detailed information
+1. **Extract Links Tab**: Upload PDF to extract all links
+2. **Process URLs Tab**: Input URLs directly to download and process
+3. **Extract & Process Tab**: Upload PDF and automatically process all HTTP links
+4. **Business Table Tab**: Upload PDF with Albanian registry links for structured business data
 
-### API Endpoints
+### Albanian Business Registry
+
+The application specializes in processing Albanian business registry documents:
+
+- Automatically downloads PDFs from QKB (National Business Center) URLs
+- Extracts structured business information using regex patterns
+- Displays results in a professional data table with search and filtering
+
+## 🔌 API Endpoints
+
+### Core Endpoints
 
 #### POST `/extract-links`
-
 Extract links from an uploaded PDF file.
 
 **Parameters:**
-
 - `file`: PDF file (multipart/form-data)
 
 **Response:**
-
 ```json
 {
-  "status": "success",
-  "filename": "document.pdf",
-  "file_size": 1234567,
-  "data": {
-    "total_links": 15,
-    "links": [...],
-    "summary": {...}
-  }
+  "filename": "example.pdf",
+  "links": ["http://example.com", "mailto:test@example.com"],
+  "metadata": {...}
 }
 ```
 
 #### POST `/process-pdf-urls`
-
-Download and process PDFs from a list of URLs.
+Process multiple PDF URLs and extract content.
 
 **Parameters:**
-
-- `urls`: Array of PDF URLs (JSON array)
+- `urls`: List of PDF URLs (JSON array)
 
 **Response:**
-
 ```json
 {
-  "status": "completed",
-  "summary": {
-    "total_urls": 5,
-    "successful": 3,
-    "failed": 1,
-    "skipped": 1
-  },
   "results": [
     {
-      "url": "http://example.com/document.pdf",
-      "status": "success",
-      "data": {
-        "links": {...},
-        "content": {
-          "summary": {...},
-          "content_analysis": {...},
-          "metadata": {...}
-        }
-      }
+      "url": "http://example.com/file.pdf",
+      "success": true,
+      "content": "...",
+      "analysis": {...}
     }
   ]
 }
 ```
 
-#### POST `/extract-and-process`
-
-Extract links from uploaded PDF and automatically download/process found PDF URLs.
+#### POST `/extract-and-process-table`
+Extract and process Albanian business registry data.
 
 **Parameters:**
-
 - `file`: PDF file (multipart/form-data)
+
+**Response:**
+```json
+{
+  "status": "completed",
+  "businesses": [
+    {
+      "business_name": "Example Business",
+      "nuis": "K12345678A",
+      "address": "Tirana, Albania",
+      "activity_field": "Information Technology"
+    }
+  ]
+}
+```
+
+### Health Check
+
+#### GET `/health`
+Health check endpoint for deployment monitoring.
+
+**Response:**
+```json
+{
+  "status": "healthy",
+  "timestamp": "2024-01-01T00:00:00Z"
+}
+```
 
 **Response:**
 
 ```json
 {
-  "status": "completed",
-  "original_file": "source.pdf",
+## 🏗️ Technical Architecture
+
+### Backend Components
+
+- **FastAPI Framework**: Modern, async web framework
+- **PDF Processing**: PyPDF2 + pdfplumber for comprehensive extraction
+- **HTTP Client**: Enhanced requests with browser-like headers
+- **Albanian Parser**: Specialized regex patterns for business registry data
+- **Production Ready**: Environment variable configuration
+
+### Frontend Components
+
+- **Responsive Design**: Mobile-friendly interface
+- **Tab Navigation**: Organized workflow with 5 distinct sections
+- **Data Table**: Professional table with sorting, filtering, and pagination
+- **Progress Indicators**: Real-time processing feedback
+
+### Deployment Architecture
+
+- **Railway**: Automatic deployment with health checks
+- **Render**: Simple deployment with build commands
+- **Heroku**: Git-based deployment with Procfile
+- **Environment Variables**: Configurable host and port settings
+
+## 🔒 Security Features
+
+- **Input Validation**: Comprehensive file type and size validation
+- **Error Handling**: Graceful error handling with detailed logging
+- **Rate Limiting**: Built-in protection against abuse
+- **SSL Support**: HTTPS-ready for production deployment
+
+## 📊 Performance
+
+- **Async Processing**: Concurrent PDF downloads and processing
+- **Memory Efficient**: Streaming file processing for large PDFs
+- **Caching**: Intelligent caching for repeated operations
+- **Load Testing**: Optimized for production workloads
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## 📝 License
+
+MIT License - see LICENSE file for details.
+
+## 🆘 Support
+
+For issues and questions:
+- Create an issue on GitHub
+- Check the documentation
+- Review the API endpoints
+
+## 🔮 Future Enhancements
+
+- [ ] Multi-language support
+- [ ] Advanced data export formats
+- [ ] Integration with more government databases
+- [ ] Machine learning for improved data extraction
+- [ ] Real-time collaboration features
+
+---
+
+**Made with ❤️ for Albanian business data processing**
   "pdf_urls_found": 5,
   "successful_downloads": 3,
   "results": [...]
