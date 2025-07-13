@@ -3,117 +3,83 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PDF Link Extractor</title>
+    <title>Albanian Business Registry Table</title>
     <style>
       body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
-        background-color: #f5f5f5;
+        background: linear-gradient(135deg, #e3f0ff 0%, #f8f9fa 100%);
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
       }
       .container {
+        max-width: 1200px;
+        margin: 40px auto;
         background: white;
-        padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 18px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        padding: 40px 32px 32px 32px;
+        position: relative;
       }
-      h1 {
-        color: #333;
-        text-align: center;
-        margin-bottom: 30px;
+      .header {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        margin-bottom: 18px;
+      }
+      .header .flag {
+        font-size: 2.2rem;
+      }
+      .header h1 {
+        font-size: 2.1rem;
+        color: #1a237e;
+        margin: 0;
+        font-weight: 700;
+        letter-spacing: 1px;
       }
       .upload-area {
-        border: 2px dashed #ccc;
-        border-radius: 10px;
-        padding: 40px;
+        border: 2.5px dashed #1976d2;
+        border-radius: 12px;
+        padding: 48px 0;
         text-align: center;
-        margin-bottom: 20px;
-        transition: border-color 0.3s;
-      }
-      .upload-area:hover {
-        border-color: #007bff;
+        background: #f4f8ff;
+        margin-bottom: 32px;
+        transition: border-color 0.3s, background 0.3s;
+        cursor: pointer;
       }
       .upload-area.dragover {
-        border-color: #007bff;
-        background-color: #f0f8ff;
-      }
-      input[type="file"] {
-        display: none;
+        border-color: #0d47a1;
+        background: #e3f2fd;
       }
       .upload-btn {
-        background-color: #007bff;
+        background: linear-gradient(90deg, #1976d2 60%, #42a5f5 100%);
         color: white;
-        padding: 12px 24px;
+        padding: 14px 32px;
         border: none;
-        border-radius: 5px;
+        border-radius: 6px;
         cursor: pointer;
-        font-size: 16px;
-        margin-top: 10px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-top: 18px;
+        box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
+        transition: background 0.2s;
       }
       .upload-btn:hover {
-        background-color: #0056b3;
-      }
-      .results {
-        margin-top: 30px;
-        padding: 20px;
-        background-color: #f8f9fa;
-        border-radius: 5px;
-        display: none;
-      }
-      .summary {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 15px;
-        margin-bottom: 20px;
-      }
-      .summary-item {
-        background: white;
-        padding: 15px;
-        border-radius: 5px;
-        text-align: center;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      }
-      .summary-number {
-        font-size: 24px;
-        font-weight: bold;
-        color: #007bff;
-      }
-      .summary-label {
-        font-size: 12px;
-        color: #666;
-        text-transform: uppercase;
-      }
-      .link-item {
-        background: white;
-        padding: 15px;
-        margin-bottom: 10px;
-        border-radius: 5px;
-        border-left: 4px solid #007bff;
-      }
-      .link-url {
-        font-weight: bold;
-        color: #007bff;
-        word-break: break-all;
-      }
-      .link-details {
-        font-size: 12px;
-        color: #666;
-        margin-top: 5px;
+        background: linear-gradient(90deg, #1565c0 60%, #1976d2 100%);
       }
       .loading {
         text-align: center;
-        padding: 20px;
+        padding: 40px 20px;
         display: none;
       }
       .spinner {
-        border: 4px solid #f3f3f3;
-        border-top: 4px solid #007bff;
+        border: 4px solid #e3f2fd;
+        border-top: 4px solid #1976d2;
         border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        animation: spin 2s linear infinite;
-        margin: 0 auto 10px;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
       }
       @keyframes spin {
         0% {
@@ -123,725 +89,406 @@
           transform: rotate(360deg);
         }
       }
-      .tabs {
-        display: flex;
-        margin-bottom: 20px;
-        border-bottom: 2px solid #eee;
-      }
-      .tab-button {
-        background: none;
-        border: none;
-        padding: 15px 25px;
-        cursor: pointer;
-        font-size: 16px;
-        border-bottom: 3px solid transparent;
-        transition: all 0.3s;
-      }
-      .tab-button:hover {
-        background-color: #f8f9fa;
-      }
-      .tab-button.active {
-        border-bottom-color: #007bff;
-        color: #007bff;
-        font-weight: bold;
-      }
-      .tab-content {
-        display: none;
-      }
-      .tab-content.active {
-        display: block;
-      }
-      .url-input-area {
-        background: white;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        margin-bottom: 20px;
-      }
-      .url-input-area textarea {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        font-family: monospace;
-        font-size: 14px;
-        resize: vertical;
-        margin-bottom: 15px;
-      }
-      .progress-item {
-        background: white;
-        padding: 15px;
-        margin-bottom: 10px;
-        border-radius: 5px;
-        border-left: 4px solid #17a2b8;
-      }
-      .progress-item.success {
-        border-left-color: #28a745;
-      }
-      .progress-item.error {
-        border-left-color: #dc3545;
-      }
-      .progress-item.skipped {
-        border-left-color: #ffc107;
-      }
-      .content-preview {
-        background: #f8f9fa;
-        padding: 10px;
-        margin-top: 10px;
-        border-radius: 5px;
-        font-family: monospace;
-        font-size: 12px;
-        max-height: 200px;
-        overflow-y: auto;
-      }
-      .metadata-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 10px;
-        margin-top: 10px;
-      }
-      .metadata-item {
-        background: white;
-        padding: 10px;
-        border-radius: 5px;
-        border: 1px solid #eee;
-      }
-      .metadata-label {
-        font-weight: bold;
-        color: #666;
-        font-size: 12px;
-        text-transform: uppercase;
-      }
-      .metadata-value {
-        color: #333;
-        margin-top: 5px;
-      }
-      .collapsible {
-        cursor: pointer;
-        padding: 10px;
-        background: #f1f1f1;
-        border: none;
-        text-align: left;
-        outline: none;
-        font-size: 14px;
-        font-weight: bold;
-        width: 100%;
-        border-radius: 5px;
-        margin-top: 10px;
-      }
-      .collapsible:hover {
-        background-color: #ddd;
-      }
-      .collapsible.active {
-        background-color: #007bff;
-        color: white;
-      }
-      .collapsible-content {
-        padding: 0 15px;
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.3s ease-out;
-        background-color: #f9f9f9;
-      }
-      .error {
-        color: #dc3545;
-        background-color: #f8d7da;
-        border: 1px solid #f5c6cb;
-        padding: 10px;
-        border-radius: 5px;
-        margin-top: 10px;
-      }
-      .business-registry-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 15px;
-        background: white;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-      .business-registry-table th,
-      .business-registry-table td {
-        padding: 12px 15px;
-        text-align: left;
-        border-bottom: 1px solid #eee;
-      }
-      .business-registry-table th {
-        background-color: #f8f9fa;
-        font-weight: bold;
-        color: #495057;
-        font-size: 14px;
-      }
-      .business-registry-table td {
-        color: #333;
-        font-size: 14px;
-      }
-      .business-registry-table tr:last-child td {
-        border-bottom: none;
-      }
-      .registry-header {
-        background: linear-gradient(135deg, #007bff, #0056b3);
-        color: white;
-        padding: 15px;
-        border-radius: 8px 8px 0 0;
-        margin-bottom: 0;
-      }
-      .registry-header h4 {
+      .loading p {
+        color: #1976d2;
+        font-size: 1.1rem;
+        font-weight: 500;
         margin: 0;
-        font-size: 16px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
       }
-      .registry-header .flag {
-        font-size: 20px;
-      }
-      .field-label-en {
-        font-size: 12px;
-        color: #6c757d;
-        font-style: italic;
-        display: block;
-        margin-top: 2px;
-      }
-      .nuis-highlight {
-        font-family: "Courier New", monospace;
-        background-color: #e3f2fd;
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-weight: bold;
-      }
-      .status-active {
-        color: #28a745;
-        font-weight: bold;
-      }
-      .status-inactive {
-        color: #dc3545;
-        font-weight: bold;
-      }
-
-      /* Business Data Table Styles */
       .table-controls {
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        margin-bottom: 20px;
+        background: #f7faff;
+        padding: 24px 20px 18px 20px;
+        border-radius: 10px;
+        box-shadow: 0 1px 4px rgba(25, 118, 210, 0.06);
+        margin-bottom: 18px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px 32px;
+        align-items: flex-end;
+        justify-content: space-between;
       }
-
       .table-header {
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        margin-bottom: 20px;
-        padding-bottom: 15px;
-        border-bottom: 1px solid #eee;
+        gap: 18px;
       }
-
       .table-header h3 {
         margin: 0;
-        color: #333;
-        font-size: 20px;
+        color: #1976d2;
+        font-size: 1.3rem;
+        font-weight: 700;
       }
-
       .table-stats {
-        color: #666;
-        font-size: 14px;
+        color: #607d8b;
+        font-size: 1rem;
+        margin-left: 10px;
       }
-
-      .search-filter-container {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 20px;
-        align-items: center;
-      }
-
       .search-box input {
-        width: 100%;
+        width: 260px;
         padding: 12px 16px;
-        border: 1px solid #ddd;
+        border: 1.5px solid #b0bec5;
         border-radius: 6px;
-        font-size: 16px;
-        box-sizing: border-box;
+        font-size: 1rem;
+        background: #fff;
+        transition: border 0.2s;
       }
-
+      .search-box input:focus {
+        border-color: #1976d2;
+        outline: none;
+      }
       .filter-controls {
         display: flex;
-        gap: 10px;
+        gap: 12px;
         align-items: center;
       }
-
       .filter-controls select {
-        padding: 8px 12px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 14px;
+        padding: 10px 14px;
+        border: 1.5px solid #b0bec5;
+        border-radius: 6px;
+        font-size: 1rem;
         min-width: 120px;
+        background: #fff;
+        transition: border 0.2s;
       }
-
+      .filter-controls select:focus {
+        border-color: #1976d2;
+        outline: none;
+      }
       .clear-filters-btn {
-        padding: 8px 16px;
-        background: #6c757d;
+        padding: 10px 18px;
+        background: #b0bec5;
         color: white;
         border: none;
-        border-radius: 4px;
+        border-radius: 6px;
         cursor: pointer;
-        font-size: 14px;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: background 0.2s;
       }
-
       .clear-filters-btn:hover {
-        background: #5a6268;
+        background: #78909c;
       }
-
-      .table-wrapper {
-        overflow-x: auto;
+      .cards-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+        gap: 24px;
+        margin-bottom: 32px;
+      }
+      .business-card {
         background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        padding: 24px;
+        border: 1px solid #e3f2fd;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
       }
-
-      .business-data-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 14px;
+      .business-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
       }
-
-      .business-data-table th {
-        background: #f8f9fa;
-        padding: 15px 10px;
-        text-align: left;
-        font-weight: 600;
-        color: #495057;
-        border-bottom: 2px solid #dee2e6;
-        cursor: pointer;
-        user-select: none;
-        position: sticky;
+      .business-card::before {
+        content: "";
+        position: absolute;
         top: 0;
-        z-index: 10;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #1976d2, #42a5f5);
       }
-
-      .business-data-table th:hover {
-        background: #e9ecef;
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
       }
-
-      .business-data-table td {
-        padding: 12px 10px;
-        border-bottom: 1px solid #dee2e6;
-        vertical-align: top;
+      .business-name {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #1a237e;
+        margin: 0;
+        line-height: 1.3;
+        flex: 1;
       }
-
-      .business-data-table tr:hover {
-        background: #f8f9fa;
-      }
-
-      .sort-indicator {
-        color: #adb5bd;
-        font-size: 12px;
-        margin-left: 5px;
-      }
-
-      .sort-indicator.asc {
-        color: #007bff;
-      }
-
-      .sort-indicator.desc {
-        color: #007bff;
-      }
-
-      .nuis-cell {
+      .nuis-badge {
+        background: linear-gradient(135deg, #1976d2, #42a5f5);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
         font-family: "Courier New", monospace;
-        font-weight: bold;
-        color: #007bff;
+        white-space: nowrap;
+        margin-left: 12px;
       }
-
-      .status-cell.active {
-        color: #28a745;
-        font-weight: bold;
+      .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 16px;
       }
-
-      .status-cell.inactive {
-        color: #dc3545;
-        font-weight: bold;
+      .status-badge.active {
+        background: #e8f5e8;
+        color: #2e7d32;
+        border: 1px solid #c8e6c9;
       }
-
-      .contact-cell {
+      .status-badge.inactive {
+        background: #ffebee;
+        color: #c62828;
+        border: 1px solid #ffcdd2;
+      }
+      .card-content {
+        display: grid;
+        gap: 12px;
+      }
+      .info-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      .info-label {
+        font-size: 0.85rem;
+        color: #607d8b;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        min-width: 80px;
+        flex-shrink: 0;
+      }
+      .info-value {
+        font-size: 0.95rem;
+        color: #37474f;
         line-height: 1.4;
+        flex: 1;
       }
-
-      .contact-cell a {
-        color: #007bff;
+      .info-value a {
+        color: #1976d2;
         text-decoration: none;
-        display: block;
-        margin-bottom: 2px;
+        font-weight: 500;
       }
-
-      .contact-cell a:hover {
+      .info-value a:hover {
         text-decoration: underline;
       }
-
-      .activity-cell {
-        max-width: 300px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+      .contact-info {
+        background: #f8f9fa;
+        padding: 12px;
+        border-radius: 8px;
+        margin-top: 8px;
       }
-
-      .address-cell {
-        max-width: 250px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+      .contact-info .info-row {
+        margin-bottom: 6px;
       }
-
+      .contact-info .info-row:last-child {
+        margin-bottom: 0;
+      }
       .pagination-container {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background: white;
-        padding: 15px 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        margin-top: 20px;
+        background: #f7faff;
+        padding: 18px 24px;
+        border-radius: 10px;
+        box-shadow: 0 1px 4px rgba(25, 118, 210, 0.06);
+        margin-top: 24px;
       }
-
       .pagination-info {
-        color: #666;
-        font-size: 14px;
+        color: #607d8b;
+        font-size: 1rem;
       }
-
       .pagination-controls {
         display: flex;
-        gap: 5px;
+        gap: 6px;
       }
-
       .pagination-btn {
-        padding: 8px 12px;
-        border: 1px solid #dee2e6;
+        padding: 10px 16px;
+        border: 1.5px solid #bbdefb;
         background: white;
-        color: #007bff;
+        color: #1976d2;
         cursor: pointer;
-        border-radius: 4px;
-        font-size: 14px;
+        border-radius: 6px;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: background 0.2s, color 0.2s;
       }
-
       .pagination-btn:hover:not(:disabled) {
-        background: #e9ecef;
+        background: #e3f2fd;
       }
-
       .pagination-btn:disabled {
-        color: #6c757d;
+        color: #b0bec5;
         cursor: not-allowed;
       }
-
       .pagination-btn.active {
-        background: #007bff;
+        background: #1976d2;
         color: white;
-        border-color: #007bff;
+        border-color: #1976d2;
       }
-
       .rows-per-page {
         display: flex;
         align-items: center;
         gap: 10px;
-        font-size: 14px;
-        color: #666;
+        font-size: 1rem;
+        color: #607d8b;
       }
-
       .rows-per-page select {
-        padding: 6px 10px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 14px;
+        padding: 8px 14px;
+        border: 1.5px solid #b0bec5;
+        border-radius: 6px;
+        font-size: 1rem;
+        background: #fff;
+        transition: border 0.2s;
+      }
+      .rows-per-page select:focus {
+        border-color: #1976d2;
+        outline: none;
+      }
+      .error {
+        color: #d32f2f;
+        background-color: #ffebee;
+        border: 1.5px solid #ffcdd2;
+        padding: 14px;
+        border-radius: 7px;
+        margin-top: 18px;
+        font-size: 1.1rem;
+        text-align: center;
+      }
+      @media (max-width: 700px) {
+        .container {
+          padding: 16px 4px;
+        }
+        .table-controls {
+          flex-direction: column;
+          gap: 18px 0;
+        }
+        .search-box input {
+          width: 100%;
+        }
+        .cards-container {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+        .business-card {
+          padding: 20px;
+        }
+        .card-header {
+          flex-direction: column;
+          gap: 12px;
+        }
+        .nuis-badge {
+          margin-left: 0;
+          align-self: flex-start;
+        }
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <h1>PDF Link Extractor & Processor</h1>
-
-      <div class="tabs">
-        <button class="tab-button active" onclick="openTab(event, 'extract')">
-          Extract Links
-        </button>
-        <button class="tab-button" onclick="openTab(event, 'process')">
-          Process URLs
-        </button>
-        <button class="tab-button" onclick="openTab(event, 'extract-process')">
-          Extract & Process
-        </button>
-        <button
-          class="tab-button"
-          onclick="openTab(event, 'extract-process-all')"
-        >
-          Process All Links
-        </button>
-        <button class="tab-button" onclick="openTab(event, 'business-table')">
-          📊 Business Table
-        </button>
+      <div class="header">
+        <span class="flag">🇦🇱</span>
+        <h1>Albanian Business Registry</h1>
       </div>
-
-      <div id="extract" class="tab-content active">
-        <h2>Extract Links from PDF</h2>
-        <div class="upload-area" id="uploadArea">
-          <div>
-            <p>Drag & drop your PDF file here or click to browse</p>
-            <input type="file" id="fileInput" accept=".pdf" />
-            <button
-              class="upload-btn"
-              onclick="document.getElementById('fileInput').click()"
-            >
-              Choose PDF File
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div id="process" class="tab-content">
-        <h2>Download & Process PDF URLs</h2>
-        <div class="url-input-area">
-          <textarea
-            id="urlsInput"
-            placeholder="Enter PDF URLs (one per line)&#10;Example:&#10;http://example.com/document.pdf&#10;http://another-site.com/report.pdf"
-            rows="6"
-          ></textarea>
-          <button class="upload-btn" onclick="processUrls()">
-            Process URLs
+      <div class="upload-area" id="uploadArea4">
+        <div>
+          <p style="font-size: 1.1rem; color: #1976d2; margin-bottom: 10px">
+            Upload a PDF to extract all Albanian business registry data
+          </p>
+          <input
+            type="file"
+            id="fileInput4"
+            accept=".pdf"
+            style="display: none"
+          />
+          <button
+            class="upload-btn"
+            onclick="document.getElementById('fileInput4').click()"
+          >
+            Choose PDF File
           </button>
         </div>
       </div>
-
-      <div id="extract-process" class="tab-content">
-        <h2>Extract Links & Download PDFs</h2>
-        <div class="upload-area" id="uploadArea2">
-          <div>
-            <p>
-              Upload a PDF to extract links, then automatically download and
-              process those PDF links
-            </p>
-            <input type="file" id="fileInput2" accept=".pdf" />
-            <button
-              class="upload-btn"
-              onclick="document.getElementById('fileInput2').click()"
-            >
-              Choose PDF File
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div id="extract-process-all" class="tab-content">
-        <h2>Extract & Process ALL Links</h2>
-        <div class="upload-area" id="uploadArea3">
-          <div>
-            <p>
-              Upload a PDF and attempt to download from ALL HTTP links found (up
-              to 50 links)
-            </p>
-            <p style="color: #dc3545; font-size: 14px">
-              ⚠️ This will try to download from every HTTP link in the PDF, not
-              just obvious PDF links
-            </p>
-            <input type="file" id="fileInput3" accept=".pdf" />
-            <button
-              class="upload-btn"
-              onclick="document.getElementById('fileInput3').click()"
-            >
-              Choose PDF File
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div id="business-table" class="tab-content">
-        <h2>🇦🇱 Albanian Business Registry Table</h2>
-        <div class="upload-area" id="uploadArea4">
-          <div>
-            <p>
-              Upload a PDF to extract all Albanian business registry data into a
-              searchable table
-            </p>
-            <input type="file" id="fileInput4" accept=".pdf" />
-            <button
-              class="upload-btn"
-              onclick="document.getElementById('fileInput4').click()"
-            >
-              Choose PDF File
-            </button>
-          </div>
-        </div>
-
-        <div
-          id="businessTableContainer"
-          style="display: none; margin-top: 20px"
-        >
-          <div class="table-controls">
-            <div class="table-header">
-              <h3>Business Registry Data</h3>
-              <div class="table-stats" id="tableStats"></div>
-            </div>
-
-            <div class="search-filter-container">
-              <div class="search-box">
-                <input
-                  type="text"
-                  id="searchInput"
-                  placeholder="🔍 Search businesses..."
-                  oninput="filterBusinessTable()"
-                />
-              </div>
-              <div class="filter-controls">
-                <select id="statusFilter" onchange="filterBusinessTable()">
-                  <option value="">All Status</option>
-                  <option value="Aktiv">Active</option>
-                  <option value="Joaktiv">Inactive</option>
-                </select>
-                <select id="legalFormFilter" onchange="filterBusinessTable()">
-                  <option value="">All Legal Forms</option>
-                  <option value="SHPK">SHPK</option>
-                  <option value="SH.A">SH.A</option>
-                  <option value="SHA">SHA</option>
-                  <option value="SHPK në likuidim">SHPK në likuidim</option>
-                </select>
-                <button class="clear-filters-btn" onclick="clearFilters()">
-                  Clear Filters
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="table-wrapper">
-            <table id="businessTable" class="business-data-table">
-              <thead>
-                <tr>
-                  <th data-column="nuis" onclick="sortBusinessTable('nuis')">
-                    NUIS <span class="sort-indicator">↕</span>
-                  </th>
-                  <th
-                    data-column="business_name"
-                    onclick="sortBusinessTable('business_name')"
-                  >
-                    Business Name <span class="sort-indicator">↕</span>
-                  </th>
-                  <th
-                    data-column="status"
-                    onclick="sortBusinessTable('status')"
-                  >
-                    Status <span class="sort-indicator">↕</span>
-                  </th>
-                  <th
-                    data-column="legal_form"
-                    onclick="sortBusinessTable('legal_form')"
-                  >
-                    Legal Form <span class="sort-indicator">↕</span>
-                  </th>
-                  <th
-                    data-column="activity_field"
-                    onclick="sortBusinessTable('activity_field')"
-                  >
-                    Activity Field <span class="sort-indicator">↕</span>
-                  </th>
-                  <th
-                    data-column="business_address"
-                    onclick="sortBusinessTable('business_address')"
-                  >
-                    Address <span class="sort-indicator">↕</span>
-                  </th>
-                  <th
-                    data-column="contact"
-                    onclick="sortBusinessTable('contact')"
-                  >
-                    Contact <span class="sort-indicator">↕</span>
-                  </th>
-                  <th
-                    data-column="registration_date"
-                    onclick="sortBusinessTable('registration_date')"
-                  >
-                    Registration Date <span class="sort-indicator">↕</span>
-                  </th>
-                  <th data-column="pages" onclick="sortBusinessTable('pages')">
-                    Pages <span class="sort-indicator">↕</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody id="businessTableBody"></tbody>
-            </table>
-          </div>
-
-          <div class="pagination-container">
-            <div class="pagination-info" id="paginationInfo"></div>
-            <div class="pagination-controls" id="paginationControls"></div>
-            <div class="rows-per-page">
-              <label>Rows per page:</label>
-              <select id="rowsPerPage" onchange="changeRowsPerPage(this.value)">
-                <option value="10">10</option>
-                <option value="25" selected>25</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div class="loading" id="loading">
         <div class="spinner"></div>
-        <p>Extracting links from PDF...</p>
+        <p>Processing PDF and extracting business data...</p>
       </div>
-
-      <div class="results" id="results">
-        <h2>Extraction Results</h2>
-        <div class="summary" id="summary"></div>
-        <div id="linksList"></div>
+      <div id="businessTableContainer" style="display: none; margin-top: 20px">
+        <div class="table-controls">
+          <div class="table-header">
+            <h3>Business Registry Data</h3>
+            <div class="table-stats" id="tableStats"></div>
+          </div>
+          <div class="search-box">
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="🔍 Search businesses..."
+              oninput="filterBusinessTable()"
+            />
+          </div>
+          <div class="filter-controls">
+            <select id="statusFilter" onchange="filterBusinessTable()">
+              <option value="">All Status</option>
+              <option value="Aktiv">Active</option>
+              <option value="Joaktiv">Inactive</option>
+            </select>
+            <select id="legalFormFilter" onchange="filterBusinessTable()">
+              <option value="">All Legal Forms</option>
+              <option value="SHPK">SHPK</option>
+              <option value="SH.A">SH.A</option>
+              <option value="SHA">SHA</option>
+              <option value="SHPK në likuidim">SHPK në likuidim</option>
+            </select>
+            <button class="clear-filters-btn" onclick="clearFilters()">
+              Clear Filters
+            </button>
+          </div>
+        </div>
+        <div class="cards-container" id="cardsContainer"></div>
+        <div class="pagination-container">
+          <div class="pagination-info" id="paginationInfo"></div>
+          <div class="pagination-controls" id="paginationControls"></div>
+          <div class="rows-per-page">
+            <label>Cards per page:</label>
+            <select id="rowsPerPage" onchange="changeRowsPerPage(this.value)">
+              <option value="6">6</option>
+              <option value="12" selected>12</option>
+              <option value="24">24</option>
+              <option value="48">48</option>
+            </select>
+          </div>
+        </div>
       </div>
+      <div class="error" id="errorBox" style="display: none"></div>
     </div>
-
     <script>
-      const uploadArea = document.getElementById("uploadArea");
-      const uploadArea2 = document.getElementById("uploadArea2");
-      const uploadArea3 = document.getElementById("uploadArea3");
-      const fileInput = document.getElementById("fileInput");
-      const fileInput2 = document.getElementById("fileInput2");
-      const fileInput3 = document.getElementById("fileInput3");
-      const loading = document.getElementById("loading");
-      const results = document.getElementById("results");
-      const summary = document.getElementById("summary");
-      const linksList = document.getElementById("linksList");
-
-      // Tab functionality
-      function openTab(evt, tabName) {
-        var i, tabcontent, tablinks;
-        tabcontent = document.getElementsByClassName("tab-content");
-        for (i = 0; i < tabcontent.length; i++) {
-          tabcontent[i].classList.remove("active");
-        }
-        tablinks = document.getElementsByClassName("tab-button");
-        for (i = 0; i < tablinks.length; i++) {
-          tablinks[i].classList.remove("active");
-        }
-        document.getElementById(tabName).classList.add("active");
-        evt.currentTarget.classList.add("active");
-
-        // No automatic loading for business table - user needs to upload file first
-      }
-
-      // Drag and drop functionality for first upload area
-      setupDragDrop(uploadArea, handleFile);
-      setupDragDrop(uploadArea2, handleFileExtractAndProcess);
-      setupDragDrop(uploadArea3, handleFileExtractAndProcessAll);
-
-      // Add drag and drop for business table upload area
       const uploadArea4 = document.getElementById("uploadArea4");
+      const fileInput4 = document.getElementById("fileInput4");
+      const loading = document.getElementById("loading");
+      let businessTableData = [];
+      let filteredData = [];
+      let currentPage = 1;
+      let rowsPerPage = 12;
+      let sortColumn = null;
+      let sortDirection = "asc";
+
       setupDragDrop(uploadArea4, handleBusinessTableFile);
+      fileInput4.addEventListener("change", (e) => {
+        if (e.target.files.length > 0) {
+          handleBusinessTableFile(e.target.files[0]);
+        }
+      });
 
       function setupDragDrop(area, handler) {
         area.addEventListener("dragover", (e) => {
           e.preventDefault();
           area.classList.add("dragover");
         });
-
         area.addEventListener("dragleave", () => {
           area.classList.remove("dragover");
         });
-
         area.addEventListener("drop", (e) => {
           e.preventDefault();
           area.classList.remove("dragover");
@@ -852,132 +499,15 @@
         });
       }
 
-      fileInput.addEventListener("change", (e) => {
-        if (e.target.files.length > 0) {
-          handleFile(e.target.files[0]);
-        }
-      });
-
-      fileInput2.addEventListener("change", (e) => {
-        if (e.target.files.length > 0) {
-          handleFileExtractAndProcess(e.target.files[0]);
-        }
-      });
-
-      fileInput3.addEventListener("change", (e) => {
-        if (e.target.files.length > 0) {
-          handleFileExtractAndProcessAll(e.target.files[0]);
-        }
-      });
-
-      // Add file input for business table tab
-      const fileInput4 = document.getElementById("fileInput4");
-      fileInput4.addEventListener("change", (e) => {
-        if (e.target.files.length > 0) {
-          handleBusinessTableFile(e.target.files[0]);
-        }
-      });
-
-      async function handleFile(file) {
-        if (!file.type.includes("pdf")) {
-          showError("Please select a PDF file.");
-          return;
-        }
-
-        const formData = new FormData();
-        formData.append("file", file);
-
-        showLoading("Extracting links from PDF...");
-        clearError();
-
-        try {
-          const response = await fetch("/extract-links", {
-            method: "POST",
-            body: formData,
-          });
-
-          const data = await response.json();
-
-          if (data.status === "success") {
-            displayResults(data);
-          } else {
-            showError(
-              data.detail || "An error occurred while processing the PDF."
-            );
-          }
-        } catch (error) {
-          showError("Failed to connect to the server. Please try again.");
-        } finally {
-          hideLoading();
-        }
+      function showLoading() {
+        loading.style.display = "block";
+        document.getElementById("businessTableContainer").style.display =
+          "none";
+        showError("");
       }
 
-      async function handleFileExtractAndProcess(file) {
-        if (!file.type.includes("pdf")) {
-          showError("Please select a PDF file.");
-          return;
-        }
-
-        const formData = new FormData();
-        formData.append("file", file);
-
-        showLoading("Extracting links and downloading PDFs...");
-        clearError();
-
-        try {
-          const response = await fetch("/extract-and-process", {
-            method: "POST",
-            body: formData,
-          });
-
-          const data = await response.json();
-
-          if (data.status === "completed" || data.status === "no_pdf_links") {
-            displayExtractAndProcessResults(data);
-          } else {
-            showError(
-              data.detail || "An error occurred while processing the PDF."
-            );
-          }
-        } catch (error) {
-          showError("Failed to connect to the server. Please try again.");
-        } finally {
-          hideLoading();
-        }
-      }
-
-      async function handleFileExtractAndProcessAll(file) {
-        if (!file.type.includes("pdf")) {
-          showError("Please select a PDF file.");
-          return;
-        }
-
-        const formData = new FormData();
-        formData.append("file", file);
-
-        showLoading("Extracting links and downloading from ALL HTTP links...");
-        clearError();
-
-        try {
-          const response = await fetch("/extract-and-process-all", {
-            method: "POST",
-            body: formData,
-          });
-
-          const data = await response.json();
-
-          if (data.status === "completed" || data.status === "no_http_links") {
-            displayExtractAndProcessAllResults(data);
-          } else {
-            showError(
-              data.detail || "An error occurred while processing the PDF."
-            );
-          }
-        } catch (error) {
-          showError("Failed to connect to the server. Please try again.");
-        } finally {
-          hideLoading();
-        }
+      function hideLoading() {
+        loading.style.display = "none";
       }
 
       async function handleBusinessTableFile(file) {
@@ -985,706 +515,43 @@
           showError("Please select a PDF file.");
           return;
         }
-
         const formData = new FormData();
         formData.append("file", file);
-
-        showLoading("Processing PDF and extracting business data...");
-        clearError();
-
+        showLoading();
         try {
           const response = await fetch("/extract-and-process-table", {
             method: "POST",
             body: formData,
           });
-
           const data = await response.json();
-
           if (data.status === "completed") {
             businessTableData = data.businesses || [];
             filteredData = [...businessTableData];
             document.getElementById("businessTableContainer").style.display =
               "block";
-            renderBusinessTable();
+            renderBusinessCards();
             updateTableStats();
-          } else if (data.status === "no_http_links") {
-            showError("No HTTP/HTTPS links found in the uploaded PDF file.");
           } else {
             showError(
               data.detail || data.message || "Failed to process the PDF file."
             );
           }
         } catch (error) {
-          console.error("Error processing business table file:", error);
           showError("Failed to connect to the server. Please try again.");
         } finally {
           hideLoading();
         }
-      }
-
-      async function processUrls() {
-        const urlsText = document.getElementById("urlsInput").value.trim();
-        if (!urlsText) {
-          showError("Please enter at least one URL.");
-          return;
-        }
-
-        const urls = urlsText
-          .split("\n")
-          .map((url) => url.trim())
-          .filter((url) => url);
-        if (urls.length === 0) {
-          showError("Please enter valid URLs.");
-          return;
-        }
-
-        showLoading(`Processing ${urls.length} URLs...`);
-        clearError();
-
-        try {
-          const response = await fetch("/process-pdf-urls", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(urls),
-          });
-
-          const data = await response.json();
-
-          if (data.status === "completed") {
-            displayUrlProcessResults(data);
-          } else {
-            showError(
-              data.detail || "An error occurred while processing URLs."
-            );
-          }
-        } catch (error) {
-          showError("Failed to connect to the server. Please try again.");
-        } finally {
-          hideLoading();
-        }
-      }
-
-      function displayResults(data) {
-        const { total_links, links, summary: summaryData } = data.data;
-
-        // Display summary
-        summary.innerHTML = `
-                <div class="summary-item">
-                    <div class="summary-number">${total_links}</div>
-                    <div class="summary-label">Total Links</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-number">${summaryData.text_urls}</div>
-                    <div class="summary-label">Text URLs</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-number">${summaryData.emails}</div>
-                    <div class="summary-label">Emails</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-number">${summaryData.annotations}</div>
-                    <div class="summary-label">Annotations</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-number">${summaryData.hyperlinks}</div>
-                    <div class="summary-label">Hyperlinks</div>
-                </div>
-            `;
-
-        // Display links
-        linksList.innerHTML = links
-          .map(
-            (link) => `
-                <div class="link-item">
-                    <div class="link-url">
-                        <a href="${link.url}" target="_blank" rel="noopener noreferrer">
-                            ${link.url}
-                        </a>
-                    </div>
-                    <div class="link-details">
-                        Type: ${link.type} | Page: ${link.page} | Source: ${link.source}
-                    </div>
-                </div>
-            `
-          )
-          .join("");
-
-        results.style.display = "block";
-      }
-
-      function displayUrlProcessResults(data) {
-        const { summary: summaryData, results: processingResults } = data;
-
-        // Display summary
-        summary.innerHTML = `
-                <div class="summary-item">
-                    <div class="summary-number">${summaryData.total_urls}</div>
-                    <div class="summary-label">Total URLs</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-number">${summaryData.successful}</div>
-                    <div class="summary-label">Successful</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-number">${summaryData.failed}</div>
-                    <div class="summary-label">Failed</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-number">${summaryData.skipped}</div>
-                    <div class="summary-label">Skipped</div>
-                </div>
-            `;
-
-        // Display processing results
-        linksList.innerHTML = processingResults
-          .map((result, index) => {
-            const statusClass =
-              result.status === "success"
-                ? "success"
-                : result.status === "skipped"
-                ? "skipped"
-                : "error";
-
-            let contentHtml = `
-                    <div class="progress-item ${statusClass}">
-                        <div class="link-url">
-                            <a href="${
-                              result.url
-                            }" target="_blank" rel="noopener noreferrer">
-                                ${result.url}
-                            </a>
-                        </div>
-                        <div class="link-details">
-                            Status: ${result.status}${
-              result.reason ? ` - ${result.reason}` : ""
-            }
-                        </div>
-                `;
-
-            if (result.status === "success" && result.data) {
-              const { content, links } = result.data;
-
-              contentHtml += `
-                        <button class="collapsible" onclick="toggleCollapsible(this)">
-                            View Content Analysis (${
-                              content.summary.total_pages
-                            } pages, ${
-                content.content_analysis.word_count || 0
-              } words)
-                        </button>
-                        <div class="collapsible-content">
-                            <div class="metadata-grid">
-                                <div class="metadata-item">
-                                    <div class="metadata-label">Pages</div>
-                                    <div class="metadata-value">${
-                                      content.summary.total_pages
-                                    }</div>
-                                </div>
-                                <div class="metadata-item">
-                                    <div class="metadata-label">Characters</div>
-                                    <div class="metadata-value">${
-                                      content.summary.total_characters
-                                    }</div>
-                                </div>
-                                <div class="metadata-item">
-                                    <div class="metadata-label">Words</div>
-                                    <div class="metadata-value">${
-                                      content.content_analysis.word_count || 0
-                                    }</div>
-                                </div>
-                                <div class="metadata-item">
-                                    <div class="metadata-label">Links Found</div>
-                                    <div class="metadata-value">${
-                                      links.total_links || 0
-                                    }</div>
-                                </div>
-                            </div>
-                            
-                            ${
-                              content.content_analysis.emails_found &&
-                              content.content_analysis.emails_found.length > 0
-                                ? `
-                                <div class="metadata-item" style="margin-top: 10px;">
-                                    <div class="metadata-label">Emails Found</div>
-                                    <div class="metadata-value">${content.content_analysis.emails_found.join(
-                                      ", "
-                                    )}</div>
-                                </div>
-                            `
-                                : ""
-                            }
-                            
-                            ${
-                              content.content_analysis.sample_text
-                                ? `
-                                <div class="content-preview">
-                                    <strong>Content Sample:</strong><br>
-                                    ${content.content_analysis.sample_text}
-                                </div>
-                            `
-                                : ""
-                            }
-                            
-                            ${renderAlbanianBusinessRegistry(
-                              content.content_analysis
-                            )}
-                        </div>
-                    `;
-            }
-
-            contentHtml += "</div>";
-            return contentHtml;
-          })
-          .join("");
-
-        results.style.display = "block";
-      }
-
-      function displayExtractAndProcessResults(data) {
-        if (data.status === "no_pdf_links") {
-          // Display original links only
-          displayResults({
-            data: data.original_links,
-            filename: data.original_file,
-          });
-
-          linksList.innerHTML =
-            `
-                    <div class="progress-item skipped">
-                        <strong>No PDF download links found in the uploaded file</strong>
-                        <p>The file contained ${data.original_links.total_links} links, but none appeared to be downloadable PDF files.</p>
-                    </div>
-                ` + linksList.innerHTML;
-          return;
-        }
-
-        // Display summary
-        summary.innerHTML = `
-                <div class="summary-item">
-                    <div class="summary-number">${data.original_links.total_links}</div>
-                    <div class="summary-label">Original Links</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-number">${data.pdf_urls_found}</div>
-                    <div class="summary-label">PDF URLs Found</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-number">${data.successful_downloads}</div>
-                    <div class="summary-label">Downloaded</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-number">${data.pdf_urls_processed}</div>
-                    <div class="summary-label">Processed</div>
-                </div>
-            `;
-
-        // Display results using the same format as URL processing
-        linksList.innerHTML = data.results
-          .map((result, index) => {
-            const statusClass =
-              result.status === "success" ? "success" : "error";
-
-            let contentHtml = `
-                    <div class="progress-item ${statusClass}">
-                        <div class="link-url">
-                            <a href="${
-                              result.url
-                            }" target="_blank" rel="noopener noreferrer">
-                                ${result.url}
-                            </a>
-                        </div>
-                        <div class="link-details">
-                            Status: ${result.status}${
-              result.reason ? ` - ${result.reason}` : ""
-            }
-                        </div>
-                `;
-
-            if (result.status === "success" && result.data) {
-              const { content, links } = result.data;
-
-              contentHtml += `
-                        <button class="collapsible" onclick="toggleCollapsible(this)">
-                            View Content Analysis (${
-                              content.summary.total_pages
-                            } pages, ${
-                content.content_analysis.word_count || 0
-              } words)
-                        </button>
-                        <div class="collapsible-content">
-                            <div class="metadata-grid">
-                                <div class="metadata-item">
-                                    <div class="metadata-label">Pages</div>
-                                    <div class="metadata-value">${
-                                      content.summary.total_pages
-                                    }</div>
-                                </div>
-                                <div class="metadata-item">
-                                    <div class="metadata-label">Characters</div>
-                                    <div class="metadata-value">${
-                                      content.summary.total_characters
-                                    }</div>
-                                </div>
-                                <div class="metadata-item">
-                                    <div class="metadata-label">Words</div>
-                                    <div class="metadata-value">${
-                                      content.content_analysis.word_count || 0
-                                    }</div>
-                                </div>
-                                <div class="metadata-item">
-                                    <div class="metadata-label">Links Found</div>
-                                    <div class="metadata-value">${
-                                      links.total_links || 0
-                                    }</div>
-                                </div>
-                            </div>
-                            
-                            ${
-                              content.content_analysis.emails_found &&
-                              content.content_analysis.emails_found.length > 0
-                                ? `
-                                <div class="metadata-item" style="margin-top: 10px;">
-                                    <div class="metadata-label">Emails Found</div>
-                                    <div class="metadata-value">${content.content_analysis.emails_found.join(
-                                      ", "
-                                    )}</div>
-                                </div>
-                            `
-                                : ""
-                            }
-                            
-                            ${
-                              content.content_analysis.sample_text
-                                ? `
-                                <div class="content-preview">
-                                    <strong>Content Sample:</strong><br>
-                                    ${content.content_analysis.sample_text}
-                                </div>
-                            `
-                                : ""
-                            }
-                            
-                            ${renderAlbanianBusinessRegistry(
-                              content.content_analysis
-                            )}
-                        </div>
-                    `;
-            }
-
-            contentHtml += "</div>";
-            return contentHtml;
-          })
-          .join("");
-
-        results.style.display = "block";
-      }
-
-      function toggleCollapsible(element) {
-        element.classList.toggle("active");
-        const content = element.nextElementSibling;
-
-        if (content.style.maxHeight) {
-          content.style.maxHeight = null;
-        } else {
-          content.style.maxHeight = content.scrollHeight + "px";
-        }
-      }
-
-      function showLoading(message) {
-        loading.style.display = "block";
-        loading.querySelector("p").textContent = message;
-        results.style.display = "none";
-      }
-
-      function hideLoading() {
-        loading.style.display = "none";
       }
 
       function showError(message) {
-        const existingError = document.querySelector(".error");
-        if (existingError) {
-          existingError.remove();
+        const errorBox = document.getElementById("errorBox");
+        if (!message) {
+          errorBox.style.display = "none";
+          errorBox.textContent = "";
+        } else {
+          errorBox.style.display = "block";
+          errorBox.textContent = message;
         }
-
-        const errorDiv = document.createElement("div");
-        errorDiv.className = "error";
-        errorDiv.textContent = message;
-
-        // Insert after the active tab content
-        const activeTab = document.querySelector(".tab-content.active");
-        activeTab.appendChild(errorDiv);
-      }
-
-      function displayExtractAndProcessAllResults(data) {
-        if (data.status === "no_http_links") {
-          // Display message about no HTTP links
-          linksList.innerHTML = `
-            <div class="progress-item skipped">
-              <strong>No HTTP/HTTPS links found in the uploaded file</strong>
-              <p>The PDF didn't contain any web links to process.</p>
-            </div>
-          `;
-          results.style.display = "block";
-          return;
-        }
-
-        const { processing_info, results: processingResults } = data;
-
-        // Display summary
-        summary.innerHTML = `
-          <div class="summary-item">
-            <div class="summary-number">${processing_info.total_http_links}</div>
-            <div class="summary-label">Total HTTP Links</div>
-          </div>
-          <div class="summary-item">
-            <div class="summary-number">${processing_info.processed_count}</div>
-            <div class="summary-label">Processed</div>
-          </div>
-          <div class="summary-item">
-            <div class="summary-number">${processing_info.successful_pdfs}</div>
-            <div class="summary-label">PDF Downloads</div>
-          </div>
-          <div class="summary-item">
-            <div class="summary-number">${processing_info.skipped_non_pdfs}</div>
-            <div class="summary-label">Non-PDF URLs</div>
-          </div>
-        `;
-
-        // Display processing results with special handling for all links
-        linksList.innerHTML = processingResults
-          .map((result, index) => {
-            const statusClass =
-              result.status === "success"
-                ? "success"
-                : result.status === "skipped"
-                ? "skipped"
-                : "error";
-
-            let contentHtml = `
-            <div class="progress-item ${statusClass}">
-              <div class="link-url">
-                <a href="${
-                  result.url
-                }" target="_blank" rel="noopener noreferrer">
-                  ${result.url}
-                </a>
-              </div>
-              <div class="link-details">
-                Status: ${result.status}${
-              result.reason ? ` - ${result.reason}` : ""
-            }
-              </div>
-          `;
-
-            if (result.status === "success" && result.data) {
-              const { content, links } = result.data;
-
-              contentHtml += `
-              <button class="collapsible" onclick="toggleCollapsible(this)">
-                📄 PDF Content Found! (${content.summary.total_pages} pages, ${
-                content.content_analysis.word_count || 0
-              } words)
-              </button>
-              <div class="collapsible-content">
-                <div style="background: #e8f5e8; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
-                  <strong>🎉 Successfully downloaded and extracted PDF content!</strong>
-                </div>
-                <div class="metadata-grid">
-                  <div class="metadata-item">
-                    <div class="metadata-label">Pages</div>
-                    <div class="metadata-value">${
-                      content.summary.total_pages
-                    }</div>
-                  </div>
-                  <div class="metadata-item">
-                    <div class="metadata-label">Characters</div>
-                    <div class="metadata-value">${
-                      content.summary.total_characters
-                    }</div>
-                  </div>
-                  <div class="metadata-item">
-                    <div class="metadata-label">Words</div>
-                    <div class="metadata-value">${
-                      content.content_analysis.word_count || 0
-                    }</div>
-                  </div>
-                  <div class="metadata-item">
-                    <div class="metadata-label">Links Found</div>
-                    <div class="metadata-value">${links.total_links || 0}</div>
-                  </div>
-                </div>
-                
-                ${
-                  content.content_analysis.emails_found &&
-                  content.content_analysis.emails_found.length > 0
-                    ? `
-                  <div class="metadata-item" style="margin-top: 10px;">
-                    <div class="metadata-label">Emails Found</div>
-                    <div class="metadata-value">${content.content_analysis.emails_found.join(
-                      ", "
-                    )}</div>
-                  </div>
-                `
-                    : ""
-                }
-                
-                ${
-                  content.content_analysis.sample_text
-                    ? `
-                  <div class="content-preview">
-                    <strong>Content Sample:</strong><br>
-                    ${content.content_analysis.sample_text}
-                  </div>
-                `
-                    : ""
-                }
-                
-                ${renderAlbanianBusinessRegistry(content.content_analysis)}
-              </div>
-            `;
-            } else if (result.status === "skipped") {
-              contentHtml += `
-              <div style="color: #856404; font-size: 14px; margin-top: 5px;">
-                💡 This URL did not return a PDF file
-              </div>
-            `;
-            } else if (
-              result.status === "error" ||
-              result.status === "failed"
-            ) {
-              contentHtml += `
-              <div style="color: #721c24; font-size: 14px; margin-top: 5px;">
-                ❌ Failed to download or process this URL
-              </div>
-            `;
-            }
-
-            contentHtml += "</div>";
-            return contentHtml;
-          })
-          .join("");
-
-        results.style.display = "block";
-      }
-
-      function clearError() {
-        const existingError = document.querySelector(".error");
-        if (existingError) {
-          existingError.remove();
-        }
-      }
-
-      function renderAlbanianBusinessRegistry(contentAnalysis) {
-        if (
-          !contentAnalysis ||
-          !contentAnalysis.albanian_business_registry ||
-          !contentAnalysis.albanian_business_registry.is_albanian_registry
-        ) {
-          return "";
-        }
-
-        const registry = contentAnalysis.albanian_business_registry;
-        const details = registry.business_details;
-        const labels = registry.field_labels;
-
-        if (!details || Object.keys(details).length === 0) {
-          return "";
-        }
-
-        let tableRows = "";
-
-        // Define the order of fields for display
-        const fieldOrder = [
-          "nuis",
-          "business_name",
-          "legal_form",
-          "registration_date",
-          "activity_field",
-          "business_address",
-          "email",
-          "phone",
-          "status",
-          "date_generated",
-        ];
-
-        fieldOrder.forEach((field) => {
-          if (details[field]) {
-            const label = labels[field];
-            let value = details[field];
-
-            // Special formatting for specific fields
-            if (field === "nuis") {
-              value = `<span class="nuis-highlight">${value}</span>`;
-            } else if (field === "email") {
-              value = `<a href="mailto:${value}" style="color: #007bff;">${value}</a>`;
-            } else if (field === "phone") {
-              value = `<a href="tel:${value.replace(
-                /\s/g,
-                ""
-              )}" style="color: #007bff;">${value}</a>`;
-            } else if (field === "status") {
-              const statusClass = value.toLowerCase().includes("aktiv")
-                ? "status-active"
-                : "status-inactive";
-              value = `<span class="${statusClass}">${value}</span>`;
-            }
-
-            tableRows += `
-              <tr>
-                <td>
-                  <strong>${label.sq}</strong>
-                  <span class="field-label-en">${label.en}</span>
-                </td>
-                <td>${value}</td>
-              </tr>
-            `;
-          }
-        });
-
-        return `
-          <div style="margin-top: 20px;">
-            <div class="registry-header">
-              <h4><span class="flag">🇦🇱</span> Albanian Business Registry Extract</h4>
-            </div>
-            <table class="business-registry-table">
-              <thead>
-                <tr>
-                  <th style="width: 40%;">Field / Fusha</th>
-                  <th style="width: 60%;">Value / Vlera</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${tableRows}
-              </tbody>
-            </table>
-          </div>
-        `;
-      }
-
-      // Business Data Table
-      let businessTableData = [];
-      let filteredData = [];
-      let currentPage = 1;
-      let rowsPerPage = 10;
-      let sortColumn = null;
-      let sortDirection = "asc";
-
-      async function loadBusinessTable() {
-        // This function is now only called after a file is uploaded
-        // The data loading is handled by handleBusinessTableFile
-        if (businessTableData.length === 0) {
-          document.getElementById("businessTableContainer").style.display =
-            "none";
-          return;
-        }
-
-        document.getElementById("businessTableContainer").style.display =
-          "block";
-        filteredData = [...businessTableData];
-        renderBusinessTable();
-        updateTableStats();
       }
 
       function filterBusinessTable() {
@@ -1694,7 +561,6 @@
         const statusFilter = document.getElementById("statusFilter").value;
         const legalFormFilter =
           document.getElementById("legalFormFilter").value;
-
         filteredData = businessTableData.filter((business) => {
           const matchesSearch =
             searchTerm === "" ||
@@ -1702,17 +568,14 @@
             business.nuis?.toLowerCase().includes(searchTerm) ||
             business.activity_field?.toLowerCase().includes(searchTerm) ||
             business.business_address?.toLowerCase().includes(searchTerm);
-
           const matchesStatus =
             statusFilter === "" || business.status === statusFilter;
           const matchesLegalForm =
             legalFormFilter === "" || business.legal_form === legalFormFilter;
-
           return matchesSearch && matchesStatus && matchesLegalForm;
         });
-
         currentPage = 1;
-        renderBusinessTable();
+        renderBusinessCards();
         updateTableStats();
       }
 
@@ -1723,89 +586,110 @@
           sortColumn = column;
           sortDirection = "asc";
         }
-
         filteredData.sort((a, b) => {
           let aValue = a[column] || "";
           let bValue = b[column] || "";
-
           if (typeof aValue === "string") {
             aValue = aValue.toLowerCase();
             bValue = bValue.toLowerCase();
           }
-
           if (sortDirection === "asc") {
             return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
           } else {
             return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
           }
         });
-
-        renderBusinessTable();
-        updateSortIndicators();
+        renderBusinessCards();
       }
 
-      function updateSortIndicators() {
-        document.querySelectorAll(".sort-indicator").forEach((indicator) => {
-          indicator.className = "sort-indicator";
-        });
-
-        if (sortColumn) {
-          const indicator = document.querySelector(
-            `[data-column="${sortColumn}"] .sort-indicator`
-          );
-          if (indicator) {
-            indicator.className = `sort-indicator ${sortDirection}`;
-          }
-        }
-      }
-
-      function renderBusinessTable() {
+      function renderBusinessCards() {
         const startIndex = (currentPage - 1) * rowsPerPage;
         const endIndex = startIndex + rowsPerPage;
         const pageData = filteredData.slice(startIndex, endIndex);
-
-        const tableBody = document.getElementById("businessTableBody");
-        tableBody.innerHTML = "";
+        const cardsContainer = document.getElementById("cardsContainer");
+        cardsContainer.innerHTML = "";
 
         pageData.forEach((business) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td class="nuis-cell">${business.nuis || "N/A"}</td>
-            <td><strong>${business.business_name || "N/A"}</strong></td>
-            <td class="status-cell ${
-              business.status === "Aktiv" ? "active" : "inactive"
-            }">
-              ${business.status || "N/A"}
-            </td>
-            <td>${business.legal_form || "N/A"}</td>
-            <td class="activity-cell" title="${
-              business.activity_field || "N/A"
-            }">
-              ${business.activity_field || "N/A"}
-            </td>
-            <td class="address-cell" title="${
-              business.business_address || "N/A"
-            }">
-              ${business.business_address || "N/A"}
-            </td>
-            <td class="contact-cell">
-              ${
-                business.phone
-                  ? `<a href="tel:${business.phone}">${business.phone}</a>`
-                  : ""
-              }
-              ${
-                business.email
-                  ? `<a href="mailto:${business.email}">${business.email}</a>`
-                  : ""
-              }
-            </td>
-            <td>${business.registration_date || "N/A"}</td>
-            <td>${business.pages ? `${business.pages} pages` : "N/A"}</td>
-          `;
-          tableBody.appendChild(row);
-        });
+          const card = document.createElement("div");
+          card.className = "business-card";
 
+          const statusClass =
+            business.status === "Aktiv" ? "active" : "inactive";
+          const hasContact = business.phone || business.email;
+
+          card.innerHTML = `
+            <div class="card-header">
+              <h3 class="business-name">${business.business_name || "N/A"}</h3>
+              <span class="nuis-badge">${business.nuis || "N/A"}</span>
+            </div>
+            <div class="status-badge ${statusClass}">${
+            business.status || "N/A"
+          }</div>
+            <div class="card-content">
+              <div class="info-row">
+                <span class="info-label">Legal Form</span>
+                <span class="info-value">${business.legal_form || "N/A"}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Activity</span>
+                <span class="info-value">${
+                  business.activity_field || "N/A"
+                }</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Address</span>
+                <span class="info-value">${
+                  business.business_address || "N/A"
+                }</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Reg. Date</span>
+                <span class="info-value">${
+                  business.registration_date || "N/A"
+                }</span>
+              </div>
+              ${
+                hasContact
+                  ? `
+                <div class="contact-info">
+                  ${
+                    business.phone
+                      ? `
+                    <div class="info-row">
+                      <span class="info-label">Phone</span>
+                      <span class="info-value"><a href="tel:${business.phone}">${business.phone}</a></span>
+                    </div>
+                  `
+                      : ""
+                  }
+                  ${
+                    business.email
+                      ? `
+                    <div class="info-row">
+                      <span class="info-label">Email</span>
+                      <span class="info-value"><a href="mailto:${business.email}">${business.email}</a></span>
+                    </div>
+                  `
+                      : ""
+                  }
+                </div>
+              `
+                  : ""
+              }
+              ${
+                business.pages
+                  ? `
+                <div class="info-row">
+                  <span class="info-label">Pages</span>
+                  <span class="info-value">${business.pages} pages</span>
+                </div>
+              `
+                  : ""
+              }
+            </div>
+          `;
+          cardsContainer.appendChild(card);
+        });
         updatePaginationControls();
       }
 
@@ -1816,19 +700,15 @@
           totalResults !== totalBusiness
             ? `Showing ${totalResults} of ${totalBusiness} businesses`
             : `${totalBusiness} businesses`;
-
-        document.querySelector(".table-stats").textContent = statsText;
+        document.getElementById("tableStats").textContent = statsText;
       }
 
       function updatePaginationControls() {
         const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-        const paginationContainer = document.querySelector(
-          ".pagination-controls"
-        );
-
+        const paginationContainer =
+          document.getElementById("paginationControls");
         paginationContainer.innerHTML = "";
 
-        // Previous button
         const prevBtn = document.createElement("button");
         prevBtn.className = "pagination-btn";
         prevBtn.textContent = "« Previous";
@@ -1836,12 +716,11 @@
         prevBtn.onclick = () => {
           if (currentPage > 1) {
             currentPage--;
-            renderBusinessTable();
+            renderBusinessCards();
           }
         };
         paginationContainer.appendChild(prevBtn);
 
-        // Page numbers
         const startPage = Math.max(1, currentPage - 2);
         const endPage = Math.min(totalPages, currentPage + 2);
 
@@ -1853,12 +732,11 @@
           pageBtn.textContent = i;
           pageBtn.onclick = () => {
             currentPage = i;
-            renderBusinessTable();
+            renderBusinessCards();
           };
           paginationContainer.appendChild(pageBtn);
         }
 
-        // Next button
         const nextBtn = document.createElement("button");
         nextBtn.className = "pagination-btn";
         nextBtn.textContent = "Next »";
@@ -1866,26 +744,25 @@
         nextBtn.onclick = () => {
           if (currentPage < totalPages) {
             currentPage++;
-            renderBusinessTable();
+            renderBusinessCards();
           }
         };
         paginationContainer.appendChild(nextBtn);
 
-        // Update pagination info
         const startIndex = (currentPage - 1) * rowsPerPage + 1;
         const endIndex = Math.min(
           currentPage * rowsPerPage,
           filteredData.length
         );
-        document.querySelector(
-          ".pagination-info"
+        document.getElementById(
+          "paginationInfo"
         ).textContent = `Showing ${startIndex}-${endIndex} of ${filteredData.length} results`;
       }
 
       function changeRowsPerPage(newRowsPerPage) {
         rowsPerPage = parseInt(newRowsPerPage);
         currentPage = 1;
-        renderBusinessTable();
+        renderBusinessCards();
       }
 
       function clearFilters() {
@@ -1894,7 +771,7 @@
         document.getElementById("legalFormFilter").value = "";
         filteredData = [...businessTableData];
         currentPage = 1;
-        renderBusinessTable();
+        renderBusinessCards();
         updateTableStats();
       }
     </script>
