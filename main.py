@@ -20,7 +20,7 @@ from datetime import datetime
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="PDF Link Extractor", version="1.0.0")
+app = FastAPI(title="Albanian Business Registry Extractor", version="1.0.0")
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -48,18 +48,26 @@ class PDFLinkExtractor:
                 # Extract annotations (clickable links in PDF)
                 if "/Annots" in page:
                     annotations = page["/Annots"]
-                    for annotation in annotations:
-                        annotation_obj = annotation.get_object()
-                        if "/A" in annotation_obj:
-                            action = annotation_obj["/A"]
-                            if "/URI" in action:
-                                uri = action["/URI"]
-                                links.append({
-                                    "type": "annotation",
-                                    "url": uri,
-                                    "page": page_num,
-                                    "source": "pypdf2"
-                                })
+                    try:
+                        # Convert to list if it's a PdfObject
+                        if hasattr(annotations, 'get_object'):
+                            annotations = annotations.get_object()
+                        if isinstance(annotations, (list, tuple)):
+                            for annotation in annotations:
+                                annotation_obj = annotation.get_object()
+                                if "/A" in annotation_obj:
+                                    action = annotation_obj["/A"]
+                                    if "/URI" in action:
+                                        uri = action["/URI"]
+                                        links.append({
+                                            "type": "annotation",
+                                            "url": uri,
+                                            "page": page_num,
+                                            "source": "pypdf2"
+                                        })
+                    except (TypeError, AttributeError, IndexError):
+                        # Skip if annotations cannot be processed
+                        pass
                 
                 # Extract text and search for URLs
                 try:
@@ -247,7 +255,9 @@ class PDFDownloaderAndExtractor:
             # If it's a government site, be more liberal with PDF detection
             if any(keyword in query for keyword in ['code', 'id', 'simple', 'subject']):
                 return True
-                
+        
+        return False
+        
     def is_potential_pdf_url(self, url: str) -> bool:
         """More liberal check for URLs that might download PDFs"""
         if not url.startswith(('http://', 'https://')):
@@ -619,57 +629,6 @@ class PDFDownloaderAndExtractor:
         
         return analysis
     
-    async def process_url(self, url: str) -> Dict[str, Any]:
-        """Download and process a single PDF URL"""
-        result = {
-            'url': url,
-            'status': 'failed',
-            'timestamp': datetime.now().isoformat(),
-            'data': {}
-        }
-        
-        try:
-            # Check if URL likely points to PDF
-            if not self.is_pdf_url(url):
-                result['status'] = 'skipped'
-                result['reason'] = 'URL does not appear to be a PDF'
-                return result
-            
-            # Download PDF
-            pdf_content = await asyncio.get_event_loop().run_in_executor(
-                self.executor, self.download_pdf, url
-            )
-            
-            if not pdf_content:
-                result['status'] = 'failed'
-                result['reason'] = 'Failed to download PDF or content is not a PDF'
-                return result
-            
-            result['data']['file_size'] = len(pdf_content)
-            
-            # Extract links from downloaded PDF
-            links_data = extractor.extract_all_links(pdf_content)
-            result['data']['links'] = links_data
-            
-            # Extract text content
-            text_data = await asyncio.get_event_loop().run_in_executor(
-                self.executor, self.extract_text_from_pdf, pdf_content
-            )
-            
-            # Analyze content
-            analysis = self.analyze_pdf_content(text_data)
-            result['data']['content'] = analysis
-            result['data']['raw_text'] = text_data  # Include raw text data
-            
-            result['status'] = 'success'
-            
-        except Exception as e:
-            result['status'] = 'error'
-            result['reason'] = str(e)
-            logging.error(f"Error processing URL {url}: {str(e)}")
-        
-        return result
-
     async def process_url_liberal(self, url: str) -> Dict[str, Any]:
         """Download and process a URL with liberal PDF detection - for processing all links"""
         result = {
@@ -730,235 +689,15 @@ async def root():
         with open("static/index.html", "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
     except FileNotFoundError:
-        return {"message": "PDF Link Extractor API", "version": "1.0.0", "note": "Web interface not found"}
-
-@app.post("/extract-links")
-async def extract_links(file: UploadFile = File(...)):
-    """Extract all links from an uploaded PDF file"""
-    
-    # Validate file type
-    if not file.filename.lower().endswith('.pdf'):
-        raise HTTPException(status_code=400, detail="File must be a PDF")
-    
-    try:
-        # Read the PDF content
-        pdf_content = await file.read()
-        
-        if not pdf_content:
-            raise HTTPException(status_code=400, detail="Empty PDF file")
-        
-        # Extract links
-        result = extractor.extract_all_links(pdf_content)
-        
-        return JSONResponse(content={
-            "status": "success",
-            "filename": file.filename,
-            "file_size": len(pdf_content),
-            "data": result
-        })
-        
-    except Exception as e:
-        logger.error(f"Error processing PDF: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error processing PDF: {str(e)}")
-
-@app.post("/process-pdf-urls")
-async def process_pdf_urls(urls: List[str]):
-    """Download PDFs from URLs and extract their content and links"""
-    
-    if not urls:
-        raise HTTPException(status_code=400, detail="No URLs provided")
-    
-    if len(urls) > 20:  # Limit to prevent abuse
-        raise HTTPException(status_code=400, detail="Too many URLs. Maximum 20 URLs allowed")
-    
-    try:
-        # Process URLs concurrently
-        tasks = [pdf_downloader.process_url(url) for url in urls]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        
-        # Handle any exceptions
-        processed_results = []
-        for i, result in enumerate(results):
-            if isinstance(result, Exception):
-                processed_results.append({
-                    'url': urls[i],
-                    'status': 'error',
-                    'reason': str(result),
-                    'timestamp': datetime.now().isoformat()
-                })
-            else:
-                processed_results.append(result)
-        
-        # Summary statistics
-        successful = len([r for r in processed_results if r['status'] == 'success'])
-        failed = len([r for r in processed_results if r['status'] in ['failed', 'error']])
-        skipped = len([r for r in processed_results if r['status'] == 'skipped'])
-        
-        return JSONResponse(content={
-            "status": "completed",
-            "summary": {
-                "total_urls": len(urls),
-                "successful": successful,
-                "failed": failed,
-                "skipped": skipped
-            },
-            "results": processed_results,
-            "timestamp": datetime.now().isoformat()
-        })
-        
-    except Exception as e:
-        logger.error(f"Error processing URLs: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error processing URLs: {str(e)}")
-
-@app.post("/extract-and-process")
-async def extract_and_process(file: UploadFile = File(...)):
-    """Extract links from uploaded PDF and then download/process those PDFs"""
-    
-    # First extract links from the uploaded PDF
-    try:
-        pdf_content = await file.read()
-        links_result = extractor.extract_all_links(pdf_content)
-        
-        # Categorize URLs by likelihood of being PDFs
-        definite_pdf_urls = []
-        potential_pdf_urls = []
-        other_urls = []
-        
-        for link in links_result.get('links', []):
-            url = link.get('url', '')
-            if url and url.startswith('http'):
-                if pdf_downloader.is_pdf_url(url):
-                    definite_pdf_urls.append(url)
-                elif pdf_downloader.is_potential_pdf_url(url):
-                    potential_pdf_urls.append(url)
-                else:
-                    other_urls.append(url)
-        
-        # Combine definite and potential URLs, prioritizing definite ones
-        all_candidate_urls = definite_pdf_urls + potential_pdf_urls
-        
-        if not all_candidate_urls:
-            return JSONResponse(content={
-                "status": "no_pdf_links",
-                "message": f"No potential PDF download links found in the uploaded file. Found {len(other_urls)} other URLs.",
-                "original_links": links_result,
-                "url_analysis": {
-                    "definite_pdf_urls": len(definite_pdf_urls),
-                    "potential_pdf_urls": len(potential_pdf_urls),
-                    "other_urls": len(other_urls),
-                    "sample_other_urls": other_urls[:5]  # Show first 5 non-PDF URLs
-                }
-            })
-        
-        # Process the found PDF URLs (limit to 20 to prevent overload)
-        urls_to_process = all_candidate_urls[:20]
-        tasks = [pdf_downloader.process_url(url) for url in urls_to_process]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        
-        # Process results
-        processed_results = []
-        for i, result in enumerate(results):
-            if isinstance(result, Exception):
-                processed_results.append({
-                    'url': urls_to_process[i],
-                    'status': 'error',
-                    'reason': str(result),
-                    'timestamp': datetime.now().isoformat()
-                })
-            else:
-                processed_results.append(result)
-        
-        successful = len([r for r in processed_results if r['status'] == 'success'])
-        
-        return JSONResponse(content={
-            "status": "completed",
-            "original_file": file.filename,
-            "original_links": links_result,
-            "url_analysis": {
-                "total_urls_found": len(links_result.get('links', [])),
-                "definite_pdf_urls": len(definite_pdf_urls),
-                "potential_pdf_urls": len(potential_pdf_urls),
-                "other_urls": len(other_urls),
-                "urls_processed": len(urls_to_process)
-            },
-            "successful_downloads": successful,
-            "results": processed_results,
-            "timestamp": datetime.now().isoformat()
-        })
-        
-    except Exception as e:
-        logger.error(f"Error in extract and process: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}")
-
-@app.post("/extract-and-process-all")
-async def extract_and_process_all(file: UploadFile = File(...)):
-    """Extract links from uploaded PDF and attempt to download from ALL HTTP links"""
-    
-    try:
-        pdf_content = await file.read()
-        links_result = extractor.extract_all_links(pdf_content)
-        
-        # Get all HTTP/HTTPS URLs
-        all_urls = []
-        for link in links_result.get('links', []):
-            url = link.get('url', '')
-            if url and url.startswith(('http://', 'https://')):
-                all_urls.append(url)
-        
-        if not all_urls:
-            return JSONResponse(content={
-                "status": "no_http_links",
-                "message": "No HTTP/HTTPS links found in the uploaded file",
-                "original_links": links_result
-            })
-        
-        # Limit to first 50 URLs to prevent server overload
-        urls_to_process = all_urls[:50]
-        
-        # Process all URLs with liberal detection
-        tasks = [pdf_downloader.process_url_liberal(url) for url in urls_to_process]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        
-        # Process results
-        processed_results = []
-        for i, result in enumerate(results):
-            if isinstance(result, Exception):
-                processed_results.append({
-                    'url': urls_to_process[i],
-                    'status': 'error',
-                    'reason': str(result),
-                    'timestamp': datetime.now().isoformat()
-                })
-            else:
-                processed_results.append(result)
-        
-        # Summary statistics
-        successful = len([r for r in processed_results if r['status'] == 'success'])
-        failed = len([r for r in processed_results if r['status'] in ['failed', 'error']])
-        skipped = len([r for r in processed_results if r['status'] == 'skipped'])
-        
-        return JSONResponse(content={
-            "status": "completed",
-            "original_file": file.filename,
-            "original_links": links_result,
-            "processing_info": {
-                "total_http_links": len(all_urls),
-                "processed_count": len(urls_to_process),
-                "successful_pdfs": successful,
-                "failed_attempts": failed,
-                "skipped_non_pdfs": skipped
-            },
-            "results": processed_results,
-            "timestamp": datetime.now().isoformat()
-        })
-        
-    except Exception as e:
-        logger.error(f"Error in extract and process all: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}")
+        return {"message": "Albanian Business Registry Extractor", "version": "1.0.0", "note": "Web interface not found"}
 
 @app.post("/extract-and-process-table")
 async def extract_and_process_table(file: UploadFile = File(...)):
     """Extract links from uploaded PDF and process all Albanian business registries into a table format"""
+    
+    # Validate file type
+    if not file.filename or not file.filename.lower().endswith('.pdf'):
+        raise HTTPException(status_code=400, detail="File must be a PDF")
     
     try:
         pdf_content = await file.read()
@@ -991,7 +730,7 @@ async def extract_and_process_table(file: UploadFile = File(...)):
             if isinstance(result, Exception):
                 continue
             
-            if result.get('status') == 'success' and result.get('data', {}).get('content', {}).get('content_analysis', {}).get('albanian_business_registry'):
+            if isinstance(result, dict) and result.get('status') == 'success' and result.get('data', {}).get('content', {}).get('content_analysis', {}).get('albanian_business_registry'):
                 registry = result['data']['content']['content_analysis']['albanian_business_registry']
                 if registry.get('is_albanian_registry') and registry.get('business_details'):
                     business = {
@@ -1029,41 +768,7 @@ async def extract_and_process_table(file: UploadFile = File(...)):
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
-    return {"status": "healthy", "service": "pdf-link-extractor"}
-
-@app.post("/test-download")
-async def test_download(url: str):
-    """Test downloading a single URL with detailed logging"""
-    logger.info(f"Testing download from: {url}")
-    
-    try:
-        # Try to download
-        pdf_content = await asyncio.get_event_loop().run_in_executor(
-            pdf_downloader.executor, pdf_downloader.download_pdf, url
-        )
-        
-        if pdf_content:
-            return {
-                "status": "success",
-                "url": url,
-                "content_size": len(pdf_content),
-                "is_pdf": pdf_content[:4] == b'%PDF',
-                "first_bytes": pdf_content[:50].hex() if len(pdf_content) >= 50 else pdf_content.hex()
-            }
-        else:
-            return {
-                "status": "failed",
-                "url": url,
-                "message": "No content downloaded"
-            }
-            
-    except Exception as e:
-        logger.error(f"Error testing download: {str(e)}")
-        return {
-            "status": "error",
-            "url": url,
-            "error": str(e)
-        }
+    return {"status": "healthy", "service": "albanian-business-registry-extractor"}
 
 if __name__ == "__main__":
     import uvicorn
