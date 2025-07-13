@@ -168,6 +168,45 @@
       .clear-filters-btn:hover {
         background: #78909c;
       }
+      .whatsapp-btn {
+        background: linear-gradient(135deg, #25d366, #128c7e);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 16px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 12px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(37, 211, 102, 0.3);
+      }
+      .whatsapp-btn:hover {
+        background: linear-gradient(135deg, #128c7e, #075e54);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+      }
+      .whatsapp-btn:active {
+        transform: translateY(0);
+      }
+      .whatsapp-icon {
+        font-size: 1.1rem;
+      }
+      .whatsapp-btn:disabled {
+        background: #b0bec5;
+        cursor: not-allowed;
+        opacity: 0.6;
+        transform: none;
+        box-shadow: none;
+      }
+      .whatsapp-btn:disabled:hover {
+        background: #b0bec5;
+        transform: none;
+        box-shadow: none;
+      }
       .cards-container {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
@@ -687,6 +726,18 @@
                   : ""
               }
             </div>
+            <button class="whatsapp-btn" onclick="sendWhatsAppMessage('${
+              business.business_name || "N/A"
+            }', '${business.phone || ""}')" ${
+            !business.phone ? "disabled" : ""
+          }>
+              <span class="whatsapp-icon">💬</span>
+              ${
+                business.phone
+                  ? "Kontakto në WhatsApp"
+                  : "Nuk ka numër telefoni"
+              }
+            </button>
           `;
           cardsContainer.appendChild(card);
         });
@@ -773,6 +824,45 @@
         currentPage = 1;
         renderBusinessCards();
         updateTableStats();
+      }
+
+      function sendWhatsAppMessage(businessName, phoneNumber) {
+        // Check if phone number exists
+        if (!phoneNumber || phoneNumber.trim() === "") {
+          alert("Nuk ka numër telefoni për këtë biznes.");
+          return;
+        }
+
+        // Albanian WhatsApp message template
+        const message = `Përshëndetje ${businessName}, urime për biznesin e ri! 🎉
+
+Ne ofrojmë një aplikacion të plotë menaxhimi biznesi që ju ndihmon të organizoni faturat, produktet, klientët dhe inventarin — gjithçka në një vend, në mënyrë të thjeshtë dhe efikase.
+
+Dëshironi një demonstrim falas për ta provuar? Pa asnjë obligim!
+
+Përgjigjuni me "PO" dhe do t'ju dërgoj më shumë detaje.`;
+
+        // Encode the message for URL
+        const encodedMessage = encodeURIComponent(message);
+
+        // Clean the phone number (remove spaces, dashes, etc.)
+        const cleanPhoneNumber = phoneNumber.replace(/[\s\-\(\)]/g, "");
+
+        // Add Albania country code if not present
+        let whatsappNumber = cleanPhoneNumber;
+        if (
+          !whatsappNumber.startsWith("+355") &&
+          !whatsappNumber.startsWith("355")
+        ) {
+          whatsappNumber = "+355" + whatsappNumber;
+        } else if (whatsappNumber.startsWith("355")) {
+          whatsappNumber = "+" + whatsappNumber;
+        }
+
+        const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+
+        // Open WhatsApp in a new tab
+        window.open(whatsappUrl, "_blank");
       }
     </script>
   </body>

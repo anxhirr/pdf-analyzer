@@ -466,6 +466,39 @@ class PDFDownloaderAndExtractor:
         
         return text_data
     
+    def clean_phone_number(self, phone: str) -> str:
+        """Clean and validate Albanian phone numbers"""
+        if not phone:
+            return ""
+        
+        # Remove all non-digit characters except + and spaces
+        cleaned = re.sub(r'[^\d\+\s]', '', phone)
+        
+        # Remove extra spaces
+        cleaned = re.sub(r'\s+', '', cleaned)
+        
+        # Handle Albanian phone number formats
+        # Remove country code if present and add it back properly
+        if cleaned.startswith('355'):
+            cleaned = '+' + cleaned
+        elif cleaned.startswith('+355'):
+            pass  # Already correct
+        elif cleaned.startswith('0'):
+            # Remove leading 0 and add +355
+            cleaned = '+355' + cleaned[1:]
+        else:
+            # Assume it's a local number, add +355
+            cleaned = '+355' + cleaned
+        
+        # Ensure it's exactly 12 digits (355 + 9 digits)
+        if len(cleaned) == 13 and cleaned.startswith('+355'):
+            return cleaned
+        elif len(cleaned) == 12 and cleaned.startswith('355'):
+            return '+' + cleaned
+        else:
+            # If it doesn't match expected format, return original but cleaned
+            return cleaned
+    
     def parse_albanian_business_registry(self, text: str) -> Dict[str, Any]:
         """Parse Albanian business registry details from PDF text"""
         registry_data = {
@@ -526,9 +559,15 @@ class PDFDownloaderAndExtractor:
                     r'email[:\s]*([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})'
                 ],
                 'phone': [
-                    r'Telefon:\s*([0-9\s\+\-\(\)]+)',
-                    r'telefon[:\s]*([0-9\s\+\-\(\)]+)',
-                    r'Tel[:\s]*([0-9\s\+\-\(\)]+)'
+                    r'Telefon:\s*(\+?355\s*[0-9]{8,9})(?:\s|$|[^\d])',
+                    r'telefon[:\s]*(\+?355\s*[0-9]{8,9})(?:\s|$|[^\d])',
+                    r'Tel[:\s]*(\+?355\s*[0-9]{8,9})(?:\s|$|[^\d])',
+                    r'Telefon:\s*(0[0-9]{8,9})(?:\s|$|[^\d])',
+                    r'telefon[:\s]*(0[0-9]{8,9})(?:\s|$|[^\d])',
+                    r'Tel[:\s]*(0[0-9]{8,9})(?:\s|$|[^\d])',
+                    r'Telefon:\s*(\+355[0-9]{8,9})(?:\s|$|[^\d])',
+                    r'telefon[:\s]*(\+355[0-9]{8,9})(?:\s|$|[^\d])',
+                    r'Tel[:\s]*(\+355[0-9]{8,9})(?:\s|$|[^\d])'
                 ],
                 'status': [
                     r'Statusi\s+([A-Za-zë]+)',
@@ -549,6 +588,11 @@ class PDFDownloaderAndExtractor:
                         # Clean up the extracted value
                         value = re.sub(r'\s+', ' ', value)  # Remove extra whitespace
                         value = value.strip('.,;')  # Remove trailing punctuation
+                        
+                        # Special cleaning for phone numbers
+                        if field == 'phone':
+                            value = self.clean_phone_number(value)
+                        
                         if value:  # Only store non-empty values
                             registry_data['business_details'][field] = value
                             break  # Use first successful match
